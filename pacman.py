@@ -1,18 +1,20 @@
 #Pacman in Python with PyGame
 #https://github.com/hbokmann/Pacman
-  
-import pygame._view
-  
+
+import pygame
+
+# Spawn coordinates for the ghosts
 black = (0,0,0)
 white = (255,255,255)
 blue = (0,0,255)
-green = (0,255,0)
+green =  (0,255,0)
 red = (255,0,0)
 purple = (255,0,255)
 yellow   = ( 255, 255,   0)
 
-Trollicon=pygame.image.load('images/Trollman.png')
-pygame.display.set_icon(Trollicon)
+# Icon for the troll man (main character)
+Trollicon=pygame.image.load('/Users/mariiaonokhina/Desktop/Skills/Forage/EA/Task 1/Vax-Man/images/Trollman.png')
+pygame.display.set_icon(Trollicon)  # Make the troll man visible
 
 #Add music
 pygame.mixer.init()
@@ -96,7 +98,7 @@ def setupGate(all_sprites_list):
       all_sprites_list.add(gate)
       return gate
 
-# This class represents the ball        
+# This class represents the ball
 # It derives from the "Sprite" class in Pygame
 class Block(pygame.sprite.Sprite):
      
@@ -169,14 +171,7 @@ class Player(pygame.sprite.Sprite):
         if x_collide:
             # Whoops, hit a wall. Go back to the old position
             self.rect.left=old_x
-            # self.rect.top=prev_y
-            # y_collide = pygame.sprite.spritecollide(self, walls, False)
-            # if y_collide:
-            #     # Whoops, hit a wall. Go back to the old position
-            #     self.rect.top=old_y
-            #     print('a')
         else:
-
             self.rect.top = new_y
 
             # Did this update cause us to hit a wall?
@@ -184,12 +179,6 @@ class Player(pygame.sprite.Sprite):
             if y_collide:
                 # Whoops, hit a wall. Go back to the old position
                 self.rect.top=old_y
-                # self.rect.left=prev_x
-                # x_collide = pygame.sprite.spritecollide(self, walls, False)
-                # if x_collide:
-                #     # Whoops, hit a wall. Go back to the old position
-                #     self.rect.left=old_x
-                #     print('b')
 
         if gate != False:
           gate_hit = pygame.sprite.spritecollide(self, gate, False)
@@ -197,7 +186,7 @@ class Player(pygame.sprite.Sprite):
             self.rect.left=old_x
             self.rect.top=old_y
 
-#Inheritime Player klassist
+# This class represents the ghosts
 class Ghost(Player):
     # Change the speed of the ghost
     def changespeed(self,list,ghost,turn,steps,l):
@@ -354,8 +343,6 @@ background = background.convert()
 # Fill the screen with a black background
 background.fill(black)
 
-
-
 clock = pygame.time.Clock()
 
 pygame.font.init()
@@ -374,9 +361,9 @@ def startGame():
   all_sprites_list = pygame.sprite.RenderPlain()
 
   block_list = pygame.sprite.RenderPlain()
-
+  
   monsta_list = pygame.sprite.RenderPlain()
-
+  
   pacman_collide = pygame.sprite.RenderPlain()
 
   wall_list = setupRoomOne(all_sprites_list)
@@ -398,7 +385,7 @@ def startGame():
 
 
   # Create the player paddle object
-  Pacman = Player( w, p_h, "images/Trollman.png" )
+  Pacman = Player(w, p_h, "images/Trollman.png" )
   all_sprites_list.add(Pacman)
   pacman_collide.add(Pacman)
    
@@ -456,23 +443,23 @@ def startGame():
               done=True
 
           if event.type == pygame.KEYDOWN:
-              if event.key == pygame.K_LEFT:
+              if event.key == pygame.K_LEFT or event.key == pygame.K_a:
                   Pacman.changespeed(-30,0)
-              if event.key == pygame.K_RIGHT:
+              if event.key == pygame.K_RIGHT or event.key == pygame.K_d:
                   Pacman.changespeed(30,0)
-              if event.key == pygame.K_UP:
+              if event.key == pygame.K_UP or event.key == pygame.K_w:
                   Pacman.changespeed(0,-30)
-              if event.key == pygame.K_DOWN:
+              if event.key == pygame.K_DOWN or event.key == pygame.K_s:
                   Pacman.changespeed(0,30)
 
           if event.type == pygame.KEYUP:
-              if event.key == pygame.K_LEFT:
+              if event.key == pygame.K_LEFT or event.key == pygame.K_a:
                   Pacman.changespeed(30,0)
-              if event.key == pygame.K_RIGHT:
+              if event.key == pygame.K_RIGHT or event.key == pygame.K_d:
                   Pacman.changespeed(-30,0)
-              if event.key == pygame.K_UP:
+              if event.key == pygame.K_UP or event.key == pygame.K_w:
                   Pacman.changespeed(0,30)
-              if event.key == pygame.K_DOWN:
+              if event.key == pygame.K_DOWN or event.key == pygame.K_s:
                   Pacman.changespeed(0,-30)
           
       # ALL EVENT PROCESSING SHOULD GO ABOVE THIS COMMENT
@@ -527,10 +514,14 @@ def startGame():
       if score == bll:
         doNext("Congratulations, you won!",145,all_sprites_list,block_list,monsta_list,pacman_collide,wall_list,gate)
 
-      monsta_hit_list = pygame.sprite.spritecollide(Pacman, monsta_list, False)
+      # monsta_hit_list = pygame.sprite.spritecollide(Pacman, monsta_list, False)
 
-      if monsta_hit_list:
-        doNext("Game Over",235,all_sprites_list,block_list,monsta_list,pacman_collide,wall_list,gate)
+      # Returns a monster with which a collision happened (if it happened)
+      monsta_collided = pygame.sprite.spritecollideany(Pacman, monsta_list)
+      
+      # If there was a collision with a monster, "kill" the monster
+      if not monsta_collided == None:
+        monsta_collided.kill()
 
       # ALL CODE TO DRAW SHOULD GO ABOVE THIS COMMENT
       
