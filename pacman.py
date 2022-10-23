@@ -330,7 +330,6 @@ screen = pygame.display.set_mode([606, 606])
 # This is a list of 'sprites.' Each block in the program is
 # added to this list. The list is managed by a class called 'RenderPlain.'
 
-
 # Set the title of the window
 pygame.display.set_caption('Pacman')
 
@@ -364,6 +363,12 @@ def startGame():
   
   monsta_list = pygame.sprite.RenderPlain()
   
+  # Lists for each type of ghost
+  blinky_ghosts = pygame.sprite.RenderPlain()
+  pinky_ghosts = pygame.sprite.RenderPlain()
+  inky_ghosts = pygame.sprite.RenderPlain()
+  clyde_ghosts = pygame.sprite.RenderPlain()
+  
   pacman_collide = pygame.sprite.RenderPlain()
 
   wall_list = setupRoomOne(all_sprites_list)
@@ -383,27 +388,30 @@ def startGame():
   c_turn = 0
   c_steps = 0
 
-
   # Create the player paddle object
-  Pacman = Player(w, p_h, "images/Trollman.png" )
+  Pacman = Player(w, p_h, "images/Pacman.png" )
   all_sprites_list.add(Pacman)
   pacman_collide.add(Pacman)
-   
+
   Blinky=Ghost( w, b_h, "images/Blinky.png" )
   monsta_list.add(Blinky)
   all_sprites_list.add(Blinky)
+  blinky_ghosts.add(Blinky)
 
   Pinky=Ghost( w, m_h, "images/Pinky.png" )
   monsta_list.add(Pinky)
   all_sprites_list.add(Pinky)
+  pinky_ghosts.add(Pinky)
    
   Inky=Ghost( i_w, m_h, "images/Inky.png" )
   monsta_list.add(Inky)
   all_sprites_list.add(Inky)
+  inky_ghosts.add(Inky)
    
   Clyde=Ghost( c_w, m_h, "images/Clyde.png" )
   monsta_list.add(Clyde)
   all_sprites_list.add(Clyde)
+  clyde_ghosts.add(Clyde)
 
   # Draw the grid
   for row in range(19):
@@ -434,11 +442,42 @@ def startGame():
 
   done = False
 
-  i = 0
+  #  Duplicate ghosts
+  def duplicate_ghosts():
+    if monsta_list.has(blinky):
+        newGhost = Ghost(w, b_h, "images/Blinky.png")
+        blinky_ghosts.add(newGhost)
+        monsta_list.add(newGhost)
+        all_sprites_list.add(newGhost)
+    
+    if monsta_list.has(pinky):
+        newGhost = Ghost(w, m_h, "images/Pinky.png")
+        pinky_ghosts.add(newGhost)
+        monsta_list.add(newGhost)
+        all_sprites_list.add(newGhost)
+        
+    if monsta_list.has(inky):
+        newGhost = Ghost(i_w, m_h, "images/Inky.png")
+        inky_ghosts.add(newGhost)
+        monsta_list.add(newGhost)
+        all_sprites_list.add(newGhost)
+        
+    if monsta_list.has(clyde):
+        newGhost = Ghost(c_w, m_h, "images/Clyde.png")
+        clyde_ghosts.add(newGhost)
+        monsta_list.add(newGhost)
+        all_sprites_list.add(newGhost)
 
+  DUPLICATE_MONSTAS = pygame.USEREVENT + 1
+  pygame.time.set_timer(DUPLICATE_MONSTAS, 30000)
+      
   while done == False:
       # ALL EVENT PROCESSING SHOULD GO BELOW THIS COMMENT
+      
       for event in pygame.event.get():
+          if event.type == DUPLICATE_MONSTAS:
+              duplicate_ghosts()
+          
           if event.type == pygame.QUIT:
               done=True
 
@@ -461,35 +500,39 @@ def startGame():
                   Pacman.changespeed(0,30)
               if event.key == pygame.K_DOWN or event.key == pygame.K_s:
                   Pacman.changespeed(0,-30)
-          
+
       # ALL EVENT PROCESSING SHOULD GO ABOVE THIS COMMENT
-   
+
       # ALL GAME LOGIC SHOULD GO BELOW THIS COMMENT
       Pacman.update(wall_list,gate)
 
-      returned = Pinky.changespeed(Pinky_directions,False,p_turn,p_steps,pl)
-      p_turn = returned[0]
-      p_steps = returned[1]
-      Pinky.changespeed(Pinky_directions,False,p_turn,p_steps,pl)
-      Pinky.update(wall_list,False)
+      for blinky in blinky_ghosts:
+          returned = Blinky.changespeed(Blinky_directions,False,b_turn,b_steps,bl)
+          b_turn = returned[0]
+          b_steps = returned[1]
+          blinky.changespeed(Blinky_directions,False,b_turn,b_steps,bl)
+          blinky.update(wall_list,False)
 
-      returned = Blinky.changespeed(Blinky_directions,False,b_turn,b_steps,bl)
-      b_turn = returned[0]
-      b_steps = returned[1]
-      Blinky.changespeed(Blinky_directions,False,b_turn,b_steps,bl)
-      Blinky.update(wall_list,False)
+      for pinky in pinky_ghosts:
+          returned = Pinky.changespeed(Pinky_directions,False,p_turn,p_steps,pl)
+          p_turn = returned[0]
+          p_steps = returned[1]
+          pinky.changespeed(Pinky_directions,False,p_turn,p_steps,pl)
+          pinky.update(wall_list,False)
 
-      returned = Inky.changespeed(Inky_directions,False,i_turn,i_steps,il)
-      i_turn = returned[0]
-      i_steps = returned[1]
-      Inky.changespeed(Inky_directions,False,i_turn,i_steps,il)
-      Inky.update(wall_list,False)
+      for inky in inky_ghosts:
+          returned = inky.changespeed(Inky_directions,False,i_turn,i_steps,il)
+          i_turn = returned[0]
+          i_steps = returned[1]
+          inky.changespeed(Inky_directions,False,i_turn,i_steps,il)
+          inky.update(wall_list,False)
 
-      returned = Clyde.changespeed(Clyde_directions,"clyde",c_turn,c_steps,cl)
-      c_turn = returned[0]
-      c_steps = returned[1]
-      Clyde.changespeed(Clyde_directions,"clyde",c_turn,c_steps,cl)
-      Clyde.update(wall_list,False)
+      for clyde in clyde_ghosts:
+          returned = clyde.changespeed(Clyde_directions,"clyde",c_turn,c_steps,cl)
+          c_turn = returned[0]
+          c_steps = returned[1]
+          clyde.changespeed(Clyde_directions,"clyde",c_turn,c_steps,cl)
+          clyde.update(wall_list,False)
 
       # See if the Pacman block has collided with anything.
       blocks_hit_list = pygame.sprite.spritecollide(Pacman, block_list, True)
@@ -497,9 +540,16 @@ def startGame():
       # Check the list of collisions.
       if len(blocks_hit_list) > 0:
           score +=len(blocks_hit_list)
+
+      # Returns a monster with which a collision happened (if it happened)
+      monsta_collided = pygame.sprite.spritecollideany(Pacman, monsta_list)
       
+      # If there was a collision with a monster, "vaccinate" the monster
+      if not monsta_collided == None:
+        monsta_collided.kill()
+
       # ALL GAME LOGIC SHOULD GO ABOVE THIS COMMENT
-   
+
       # ALL CODE TO DRAW SHOULD GO BELOW THIS COMMENT
       screen.fill(black)
         
@@ -510,18 +560,12 @@ def startGame():
 
       text=font.render("Score: "+str(score)+"/"+str(bll), True, red)
       screen.blit(text, [10, 10])
-
-      if score == bll:
-        doNext("Congratulations, you won!",145,all_sprites_list,block_list,monsta_list,pacman_collide,wall_list,gate)
-
-      # monsta_hit_list = pygame.sprite.spritecollide(Pacman, monsta_list, False)
-
-      # Returns a monster with which a collision happened (if it happened)
-      monsta_collided = pygame.sprite.spritecollideany(Pacman, monsta_list)
       
-      # If there was a collision with a monster, "kill" the monster
-      if not monsta_collided == None:
-        monsta_collided.kill()
+      if len(monsta_list) == 0 and score == bll:
+            doNext("Congratulations, you won!",145,all_sprites_list,block_list,monsta_list,pacman_collide,wall_list,gate)
+
+      if len(monsta_list) == 128 and not score == bll:
+            doNext("Game Over. Retry?",145,all_sprites_list,block_list,monsta_list,pacman_collide,wall_list,gate)
 
       # ALL CODE TO DRAW SHOULD GO ABOVE THIS COMMENT
       
@@ -564,7 +608,7 @@ def doNext(message,left,all_sprites_list,block_list,monsta_list,pacman_collide,w
 
       pygame.display.flip()
 
-      clock.tick(10)
+      clock.tick(5000)
 
 startGame()
 
